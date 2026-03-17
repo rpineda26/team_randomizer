@@ -1,3 +1,4 @@
+import '../App.css'
 import { useAppPresenter } from './presenter/useAppPresenter'
 import { TabBar } from './components/shared/TabBar'
 import { PeopleView } from './views/PeopleView'
