@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react'
 import type { Team, Constraint } from '../../../backend/types'
 import { MemberChip } from './MemberChip'
 import { BalanceScoreBadge } from './BalanceScoreBadge'
@@ -14,6 +15,9 @@ interface TeamCardProps {
 }
 
 export function TeamCard({ team, constraints, onSwap }: TeamCardProps) {
+  const [dragOver, setDragOver] = useState(false)
+  const dragCounter = useRef(0)
+
   const handleDragStart = (personId: string) => (e: React.DragEvent) => {
     e.dataTransfer.setData(
       'application/json',
@@ -21,8 +25,30 @@ export function TeamCard({ team, constraints, onSwap }: TeamCardProps) {
     )
   }
 
+  const handleCardDragEnter = () => {
+    dragCounter.current++
+    setDragOver(true)
+  }
+
+  const handleCardDragLeave = () => {
+    dragCounter.current--
+    if (dragCounter.current === 0) {
+      setDragOver(false)
+    }
+  }
+
+  const handleCardDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleCardDrop = () => {
+    dragCounter.current = 0
+    setDragOver(false)
+  }
+
   const handleDrop = (toPersonId: string) => (e: React.DragEvent) => {
     e.preventDefault()
+    handleCardDrop()
     try {
       const data = JSON.parse(e.dataTransfer.getData('application/json'))
       onSwap(data.teamId, data.personId, team.id, toPersonId)
@@ -32,7 +58,12 @@ export function TeamCard({ team, constraints, onSwap }: TeamCardProps) {
   }
 
   return (
-    <div className="team-card">
+    <div
+      className={`team-card ${dragOver ? 'team-card--drag-over' : ''}`}
+      onDragEnter={handleCardDragEnter}
+      onDragLeave={handleCardDragLeave}
+      onDragOver={handleCardDragOver}
+    >
       <div className="team-card__header">
         <h3 className="team-card__title">{team.id}</h3>
         <BalanceScoreBadge score={team.balanceScore} />
