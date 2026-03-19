@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { BalanceResult, Constraint } from '../../backend/types'
 import { TeamCard } from '../components/teams/TeamCard'
 import { BalanceScoreBadge } from '../components/teams/BalanceScoreBadge'
@@ -25,6 +26,34 @@ export function TeamsView({
   onCopyToClipboard,
   onDownloadCSV,
 }: TeamsViewProps) {
+  const [swapMode, setSwapMode] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<{ teamId: string; personId: string } | null>(null)
+
+  const toggleSwapMode = () => {
+    setSwapMode((prev) => !prev)
+    setSelectedMember(null)
+  }
+
+  const handleTapMember = (teamId: string, personId: string) => {
+    if (!swapMode) return
+    if (!selectedMember) {
+      setSelectedMember({ teamId, personId })
+      return
+    }
+    if (selectedMember.teamId === teamId && selectedMember.personId === personId) {
+      setSelectedMember(null)
+      return
+    }
+    onSwap(selectedMember.teamId, selectedMember.personId, teamId, personId)
+    setSelectedMember(null)
+  }
+
+  const selectedName = selectedMember
+    ? result?.teams
+        .find((t) => t.id === selectedMember.teamId)
+        ?.members.find((m) => m.id === selectedMember.personId)?.name
+    : null
+
   if (!result) {
     return (
       <EmptyState
@@ -42,6 +71,12 @@ export function TeamsView({
           <button className="btn btn--primary" onClick={onRerun}>
             Re-balance
           </button>
+          <button
+            className={`btn teams-view__swap-toggle ${swapMode ? 'btn--primary' : ''}`}
+            onClick={toggleSwapMode}
+          >
+            {swapMode ? 'Cancel Swap' : 'Swap Members'}
+          </button>
           <button className="btn" onClick={onCopyToClipboard}>
             Copy to Clipboard
           </button>
@@ -50,12 +85,21 @@ export function TeamsView({
           </button>
         </div>
       </div>
+      {swapMode && (
+        <div className="teams-view__swap-hint">
+          {selectedName
+            ? <>Tap another person to swap with <strong>{selectedName}</strong>, or tap them again to cancel.</>
+            : 'Tap any person to select them for swapping.'}
+        </div>
+      )}
       <div className="teams-view__grid">
         {result.teams.map((team) => (
           <TeamCard
             key={team.id}
             team={team}
             constraints={constraints}
+            selectedPersonId={selectedMember?.teamId === team.id ? selectedMember.personId : null}
+            onTapMember={handleTapMember}
             onSwap={onSwap}
           />
         ))}

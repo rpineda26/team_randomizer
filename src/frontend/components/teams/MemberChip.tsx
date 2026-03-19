@@ -7,6 +7,8 @@ interface MemberChipProps {
   person: ScoredPerson
   constraints: Constraint[]
   draggable?: boolean
+  selected?: boolean
+  onTap?: () => void
   onDragStart?: (e: React.DragEvent) => void
   onDragOver?: (e: React.DragEvent) => void
   onDrop?: (e: React.DragEvent) => void
@@ -16,6 +18,8 @@ export function MemberChip({
   person,
   constraints,
   draggable = false,
+  selected = false,
+  onTap,
   onDragStart,
   onDragOver,
   onDrop,
@@ -23,10 +27,17 @@ export function MemberChip({
   const [dropTarget, setDropTarget] = useState(false)
   const dragCounter = useRef(0)
 
+  const classes = [
+    'member-chip',
+    dropTarget ? 'member-chip--drop-target' : '',
+    selected ? 'member-chip--selected' : '',
+  ].filter(Boolean).join(' ')
+
   return (
     <div
-      className={`member-chip ${dropTarget ? 'member-chip--drop-target' : ''}`}
+      className={classes}
       draggable={draggable}
+      onClick={onTap}
       onDragStart={onDragStart}
       onDragEnter={() => {
         dragCounter.current++

@@ -6,6 +6,8 @@ import { BalanceScoreBadge } from './BalanceScoreBadge'
 interface TeamCardProps {
   team: Team
   constraints: Constraint[]
+  selectedPersonId?: string | null
+  onTapMember: (teamId: string, personId: string) => void
   onSwap: (
     fromTeamId: string,
     fromPersonId: string,
@@ -14,7 +16,7 @@ interface TeamCardProps {
   ) => void
 }
 
-export function TeamCard({ team, constraints, onSwap }: TeamCardProps) {
+export function TeamCard({ team, constraints, selectedPersonId, onTapMember, onSwap }: TeamCardProps) {
   const [dragOver, setDragOver] = useState(false)
   const dragCounter = useRef(0)
 
@@ -75,6 +77,8 @@ export function TeamCard({ team, constraints, onSwap }: TeamCardProps) {
             person={member}
             constraints={constraints}
             draggable
+            selected={selectedPersonId === member.id}
+            onTap={() => onTapMember(team.id, member.id)}
             onDragStart={handleDragStart(member.id)}
             onDrop={handleDrop(member.id)}
           />
