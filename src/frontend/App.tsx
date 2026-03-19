@@ -11,7 +11,9 @@ export function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1 className="app__title">Team Balancer</h1>
+        <h1 className="app__title">
+          Team<span className="app__title-pill">Balancer</span>
+        </h1>
         <TabBar
           tabs={['people', 'teams', 'presets']}
           active={presenter.activeTab}
