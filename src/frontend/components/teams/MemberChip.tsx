@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react'
 import type { ScoredPerson, Constraint } from '../../../backend/types'
 import { Avatar } from '../shared/Avatar'
 import { TagBadge } from '../shared/TagBadge'
@@ -19,16 +20,31 @@ export function MemberChip({
   onDragOver,
   onDrop,
 }: MemberChipProps) {
+  const [dropTarget, setDropTarget] = useState(false)
+  const dragCounter = useRef(0)
+
   return (
     <div
-      className="member-chip"
+      className={`member-chip ${dropTarget ? 'member-chip--drop-target' : ''}`}
       draggable={draggable}
       onDragStart={onDragStart}
+      onDragEnter={() => {
+        dragCounter.current++
+        setDropTarget(true)
+      }}
+      onDragLeave={() => {
+        dragCounter.current--
+        if (dragCounter.current === 0) setDropTarget(false)
+      }}
       onDragOver={(e) => {
         e.preventDefault()
         onDragOver?.(e)
       }}
-      onDrop={onDrop}
+      onDrop={(e) => {
+        dragCounter.current = 0
+        setDropTarget(false)
+        onDrop?.(e)
+      }}
     >
       {draggable && <span className="member-chip__handle">&#8942;&#8942;</span>}
       <Avatar name={person.name} colorIndex={person.colorIndex} />
